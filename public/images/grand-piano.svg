@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1000" fill="none">
+<defs>
+ <linearGradient id="body" x1="350" y1="100" x2="1050" y2="900" gradientUnits="userSpaceOnUse"><stop stop-color="#353936"/><stop offset=".45" stop-color="#111512"/><stop offset=".8" stop-color="#070a08"/><stop offset="1" stop-color="#343b31"/></linearGradient>
+ <linearGradient id="lid" x1="430" y1="190" x2="960" y2="500" gradientUnits="userSpaceOnUse"><stop stop-color="#080c09"/><stop offset=".5" stop-color="#222c23"/><stop offset=".8" stop-color="#0d130e"/><stop offset="1" stop-color="#667258"/></linearGradient>
+ <linearGradient id="gold"><stop stop-color="#b9a575"/><stop offset=".5" stop-color="#655333"/><stop offset="1" stop-color="#c7b78b"/></linearGradient>
+ <linearGradient id="ivory" x2="0" y2="1"><stop stop-color="#aaa99a"/><stop offset="1" stop-color="#eee9d8"/></linearGradient>
+ <filter id="shadow"><feGaussianBlur stdDeviation="28"/></filter>
+ <pattern id="strings" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-19)"><path d="M0 0V10" stroke="#9b8552" stroke-width="1"/></pattern>
+ <pattern id="keys" width="24" height="125" patternUnits="userSpaceOnUse"><rect width="23" height="125" fill="url(#ivory)"/><rect x="17" width="10" height="76" fill="#090c09"/></pattern>
+</defs>
+<ellipse cx="735" cy="850" rx="490" ry="55" fill="#000" opacity=".5" filter="url(#shadow)"/>
+<path d="M435 649L455 876 477 881 484 656M1045 574L1028 806 1006 810 1000 594M720 620L741 828 759 830 764 619" fill="url(#body)" stroke="#41483c" stroke-width="2"/>
+<path d="M407 492C504 437 549 424 605 377C683 316 875 232 1015 301C1125 355 1163 445 1107 523L1048 620 666 762 368 604Z" fill="url(#body)" stroke="#69715d" stroke-width="2"/>
+<path d="M412 486C504 431 549 418 605 371C683 310 875 226 1015 295C1125 349 1163 439 1107 517L1048 585 669 714 375 580Z" fill="#756747" stroke="#a48f5d" stroke-width="3"/>
+<path d="M442 479C602 398 702 252 948 303C1061 325 1121 408 1074 487L1027 551 671 678Z" fill="#28291b"/>
+<path d="M442 479C602 398 702 252 948 303C1061 325 1121 408 1074 487L1027 551 671 678Z" fill="url(#strings)"/>
+<path d="M493 487L972 326M546 517L1040 368M605 549L1070 427M671 580L1060 479" stroke="url(#gold)" stroke-width="12"/>
+<path d="M397 474L361 581 666 729 706 617Z" fill="#111711" stroke="#73775d" stroke-width="2"/>
+<path d="M381 558L653 690 683 616 411 491Z" fill="url(#keys)"/>
+<path d="M408 489L685 616 693 604 416 478Z" fill="#4c1d1c"/>
+<path d="M685 603L990 482 990 283" stroke="#a5a17b" stroke-width="6"/>
+<path d="M414 477L503 194C622 167 697 80 862 98C1015 115 1104 208 1111 294L1018 452 690 601Z" fill="url(#lid)" stroke="#68745a" stroke-width="3"/>
+<path d="M503 194C622 167 697 80 862 98C1015 115 1104 208 1111 294" stroke="#aab395" stroke-opacity=".5" stroke-width="2"/>
+<path d="M432 478L518 210M704 583L1029 436" stroke="#9f9d7b" stroke-opacity=".4"/>
+<path d="M480 472L515 370 714 447 685 551Z" fill="#111910" stroke="#5e6852"/>
+<text x="535" y="451" fill="#b1ab88" font-family="Arial,sans-serif" font-size="11" letter-spacing="4" transform="rotate(23 535 451)">PRELUDE</text>
+<path d="M683 730L676 789 754 815 764 798 705 777 711 723" stroke="#79704d" stroke-width="6"/>
+<path d="M714 807L735 813M735 799L756 805M753 791L774 797" stroke="#c2ad71" stroke-width="9" stroke-linecap="round"/>
+</svg>
