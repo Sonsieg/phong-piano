@@ -1,4 +1,7 @@
+import { ExperienceMotion } from '@/components/experience-motion';
 import type { Metadata } from 'next';
+import { MusicProvider } from '@/components/music/music-provider';
+import { MusicPlayer } from '@/components/music/music-player';
 import { Header, Footer } from '@/components/shell';
 import '@fontsource/be-vietnam-pro/400.css';
 import '@fontsource/be-vietnam-pro/500.css';
@@ -27,9 +30,13 @@ export default function RootLayout({
         <a href="#main" className="skip-link">
           Đến nội dung chính
         </a>
-        <Header />
-        <main id="main">{children}</main>
-        <Footer />
+        <MusicProvider>
+          <ExperienceMotion />
+          <Header />
+          <main id="main">{children}</main>
+          <Footer />
+          <MusicPlayer />
+        </MusicProvider>
       </body>
     </html>
   );

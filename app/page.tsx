@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Hero, PianoKeyboard, ProjectCarousel } from '@/components/interactions';
+import { Hero, PianoKeyboard, ProjectGrid } from '@/components/interactions';
 import { student } from '@/src/config/student';
 export default function Home() {
   return (
@@ -162,7 +162,7 @@ export default function Home() {
           <br />
           <span>Một hành trình.</span>
         </h2>
-        <ProjectCarousel />
+        <ProjectGrid />
       </section>
       <PianoKeyboard />
       <section className="purpose section-pad">

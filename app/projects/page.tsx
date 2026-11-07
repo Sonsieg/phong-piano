@@ -1,7 +1,8 @@
+import { ChapterIcon } from '@/components/chapter-icon';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { assignments } from '@/src/data/assignments';
-import { ProjectCarousel } from '@/components/interactions';
+import { ProjectGrid } from '@/components/interactions';
 export const metadata: Metadata = { title: 'Dự án — Sáu chương' };
 export default function Projects() {
   return (
@@ -50,14 +51,16 @@ export default function Projects() {
               </div>
             </div>
             <div className={`row-art art-${a.id}`} aria-hidden="true">
-              <span>{['⌘', '⌕', '“', '+', '✳', '≈'][a.id - 1]}</span>
+              <span>
+                <ChapterIcon id={a.id} />
+              </span>
             </div>
             <span className="row-arrow">↗</span>
           </Link>
         ))}
       </section>
       <section className="section-pad stone">
-        <ProjectCarousel />
+        <ProjectGrid />
       </section>
     </>
   );

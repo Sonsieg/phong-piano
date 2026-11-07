@@ -1,5 +1,9 @@
 'use client';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
+import { MusicToggle } from './music/music-player';
+import { ChapterIcon } from './chapter-icon';
+const MusicAtmosphere = dynamic(() => import('./music-atmosphere'), { ssr: false });
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { assignments, type Deliverable } from '@/src/data/assignments';
@@ -112,6 +116,7 @@ export function Hero() {
       </div>
       <div ref={scene} className="piano-scene">
         <div className="stage-orbit" />
+        <MusicAtmosphere />
         <Image
           src="/images/grand-piano.svg"
           alt="Minh họa đại dương cầm dưới ánh sáng sân khấu"
@@ -128,10 +133,13 @@ export function Hero() {
         </p>
         <h1>{slides[index].title}</h1>
         <p className="hero-description">{slides[index].text}</p>
-        <Link className="text-link light" href={slides[index].link}>
-          {slides[index].cta}
-          <span>↗</span>
-        </Link>
+        <div className="hero-ctas">
+          <Link className="text-link light" href={slides[index].link}>
+            {slides[index].cta}
+            <span>↗</span>
+          </Link>
+          <MusicToggle />
+        </div>
       </div>
       <div className="hero-bottom">
         <span className="hero-signature">
@@ -179,49 +187,20 @@ export function Hero() {
     </section>
   );
 }
-export function ProjectCarousel() {
-  const track = useRef<HTMLDivElement>(null);
+export function ProjectGrid() {
   return (
-    <div className="project-carousel">
-      <div className="carousel-heading">
+    <div className="project-collection">
+      <div className="project-grid-heading">
         <p className="eyebrow">SÁU CHƯƠNG HỌC TẬP</p>
-        <div>
-          <button
-            aria-label="Dự án trước"
-            onClick={() =>
-              track.current?.scrollBy({
-                left: -track.current.clientWidth * 0.8,
-                behavior: 'smooth',
-              })
-            }
-          >
-            ←
-          </button>
-          <button
-            aria-label="Dự án tiếp theo"
-            onClick={() =>
-              track.current?.scrollBy({
-                left: track.current.clientWidth * 0.8,
-                behavior: 'smooth',
-              })
-            }
-          >
-            →
-          </button>
-        </div>
+        <span className="project-grid-hint">Chọn một chương để bắt đầu ↗</span>
       </div>
-      <div
-        className="project-track"
-        ref={track}
-        tabIndex={0}
-        aria-label="Danh sách dự án, có thể cuộn ngang"
-      >
+      <div className="project-grid" aria-label="Sáu chương học tập">
         {assignments.map((a) => (
           <Link href={`/projects/${a.slug}`} className={`project-slide art-${a.id}`} key={a.id}>
             <div className="project-art">
               <span className="art-number">0{a.id}</span>
               <span className="art-symbol" aria-hidden="true">
-                {['⌘', '⌕', '“', '+', '✳', '≈'][a.id - 1]}
+                <ChapterIcon id={a.id} />
               </span>
               <span className="art-caption">MOVEMENT / 0{a.id}</span>
               <span className="project-arrow">↗</span>

@@ -1,3 +1,4 @@
+import { ExerciseWorkspace } from '@/components/exercise-workspace';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -66,6 +67,7 @@ export default async function AssignmentPage({
           <a href="#objectives">01 — Mục tiêu</a>
           <a href="#process">02 — Quy trình</a>
           <a href="#workshop">03 — Nội dung thực hành</a>
+          <a href="#my-work">＋ Bài làm & trợ giảng</a>
           <a href="#evidence">04 — Sản phẩm & minh chứng</a>
           <a href="#reflection">05 — Tự đánh giá & nguồn</a>
           <p className="sidebar-note">
@@ -110,6 +112,7 @@ export default async function AssignmentPage({
             <p className="eyebrow">03 / KHÔNG GIAN THỰC HÀNH</p>
             <AssignmentContent id={a.id} />
           </section>
+          <ExerciseWorkspace key={a.id} id={a.id} />
           <section id="evidence">
             <p className="eyebrow">04 / SẢN PHẨM & MINH CHỨNG</p>
             <h2>
