@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { playlist } from '@/src/config/playlist';
 import { useMusic } from './music-provider';
+import { TrackPlayer } from './track-player';
 
 export function MusicToggle({ compact = false }: { compact?: boolean }) {
   const { playing, loading, toggle } = useMusic();
@@ -97,6 +98,7 @@ export function MusicPlayer() {
           <p className="eyebrow">PIANO / LẮNG NGHE</p>
           <h2>{track?.title ?? 'Chưa có nguồn nhạc'}</h2>
           <p>{track?.composer ?? 'Bổ sung bản nhạc có quyền sử dụng để bắt đầu.'}</p>
+          <TrackPlayer compact />
           <div className="music-controls">
             <button onClick={toggleMute} aria-pressed={muted}>
               {muted ? 'Bỏ tắt tiếng' : 'Tắt tiếng'}

@@ -233,7 +233,8 @@ const blackNotes = [
   { name: 'Sol thăng', freq: 415.3, pos: 5, key: 'y' },
   { name: 'La thăng', freq: 466.16, pos: 6, key: 'u' },
 ];
-export function PianoKeyboard() {
+export function PianoKeyboard({ embedded = false }: { embedded?: boolean }) {
+  const Heading = embedded ? 'h3' : 'h2';
   const [active, setActive] = useState('');
   const [error, setError] = useState('');
   const audio = useRef<AudioContext | null>(null);
@@ -273,15 +274,18 @@ export function PianoKeyboard() {
     [],
   );
   return (
-    <section className="keyboard-section">
+    <section
+      className={`keyboard-section ${embedded ? 'keyboard-embedded' : ''}`}
+      aria-label="Góc trải nghiệm piano tương tác"
+    >
       <div className="keyboard-intro">
         <div>
           <p className="eyebrow">MỘT KHOẢNG LẶNG ĐỂ CẢM NHẬN</p>
-          <h2>
+          <Heading>
             Chạm vào
             <br />
             một giai điệu.
-          </h2>
+          </Heading>
         </div>
         <div>
           <p>

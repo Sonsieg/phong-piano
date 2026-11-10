@@ -1,7 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { tongKet } from '@/portfolio-nextjs/content/portfolio';
+import { Bang, DinhDang } from '@/portfolio-nextjs/components/portfolio-ui';
 import { assignments } from '@/src/data/assignments';
-export const metadata: Metadata = { title: 'Tổng kết — Hành trình tiếp nối' };
+import s from '@/portfolio-nextjs/components/portfolio.module.css';
+export const metadata: Metadata = {
+  title: 'Tổng kết — Hành trình học tập',
+  description: tongKet.moDau,
+};
 export default function Conclusion() {
   return (
     <>
@@ -10,106 +16,112 @@ export default function Conclusion() {
           <Link href="/">TRANG CHỦ / TỔNG KẾT</Link>
           <span>THE FINALE</span>
         </div>
-        <p className="eyebrow">MỘT ĐIỂM DỪNG. KHÔNG PHẢI ĐÍCH ĐẾN.</p>
+        <p className="eyebrow">NHÌN LẠI ĐỂ TIẾP TỤC</p>
         <h1>
           Khép lại một chương.
           <br />
           <span>Mở ra hành trình mới.</span>
         </h1>
-        <p className="finale-description">
-          Một portfolio không chỉ lưu lại điều đã làm, mà còn gợi mở những điều mình muốn trở thành.
+        <p className="finale-description">{tongKet.moDau}</p>
+      </section>
+      <div className={`conclusion-body section-pad ${s.tongKet}`}>
+        <p className="note">
+          Nội dung dưới đây được biên tập từ bản tổng kết bạn cung cấp. Phần cảm nhận và tự đánh giá
+          cần được bạn rà soát, sửa bằng trải nghiệm thật và xác nhận trước khi nộp theo mục IV.3
+          của đề thi.
         </p>
-        <div className="finale-score" aria-hidden="true">
-          <span>p.</span>
-          <i />
-          <i />
-          <i />
-          <i />
-          <i />
-        </div>
-      </section>
-      <section className="conclusion-body section-pad">
-        <div className="section-label">
-          <span>01 / NHÌN LẠI</span>
-          <span>GHI CHÉP CỦA NGƯỜI HỌC</span>
-        </div>
-        <div className="goals-layout">
+        <section>
+          <p className="eyebrow">01 / TRẢI NGHIỆM VÀ CẢM NHẬN</p>
+          <h2>Nhìn lại cách mình học.</h2>
+          {tongKet.traiNghiem.map((text, i) => (
+            <p key={i}>
+              <DinhDang text={text} />
+            </p>
+          ))}
+        </section>
+        <section>
+          <p className="eyebrow">02 / KIẾN THỨC VÀ KỸ NĂNG</p>
+          <h2>Sáu bài tập, những kết nối.</h2>
+          {tongKet.kienThuc.map((item, i) => (
+            <article className="goal-row" key={i}>
+              <span>0{i + 1}</span>
+              <div>
+                <p>
+                  <DinhDang text={item.noiDung} />
+                </p>
+                {item.slug && (
+                  <Link className="text-link" href={`/projects/${item.slug}`}>
+                    Xem bài tập liên quan ↗
+                  </Link>
+                )}
+              </div>
+            </article>
+          ))}
+        </section>
+        <section>
+          <p className="eyebrow">03 / ĐIỀU TÂM ĐẮC</p>
+          <h2>Từ sản phẩm đến bài học.</h2>
+          {tongKet.tamDac.map((text, i) => (
+            <p key={i}>
+              <DinhDang text={text} />
+            </p>
+          ))}
+          <h3>Thách thức và cách vượt qua</h3>
+          <Bang
+            cot={['Thách thức', 'Cách vượt qua']}
+            dong={tongKet.thachThuc.map((item) => [item.thachThuc, item.cachVuotQua])}
+          />
+        </section>
+        <section id="sources">
+          <p className="eyebrow">04 / MINH BẠCH VỀ AI VÀ NGUỒN</p>
           <h2>
-            Những điều
+            Công nghệ hỗ trợ.
             <br />
-            đọng lại.
+            Con người làm chủ.
           </h2>
-          <div>
-            {[
-              {
-                title: 'Trải nghiệm học tập',
-                text: 'Chưa bổ sung. Hãy viết về điều bạn hiểu thêm sau khi thực hiện sáu bài tập.',
-              },
-              {
-                title: 'Kiến thức & kỹ năng số',
-                text: 'Các chủ đề cần tự đánh giá: quản trị tệp tin, tìm kiếm học thuật, thiết kế prompt, cộng tác trực tuyến, sáng tạo nội dung và trách nhiệm với AI.',
-              },
-              {
-                title: 'Thành quả ý nghĩa nhất',
-                text: 'Chưa bổ sung thành quả thực tế. Hãy chọn một sản phẩm, dẫn minh chứng và giải thích ý nghĩa với bản thân.',
-              },
-              {
-                title: 'Thử thách & bài học',
-                text: 'Chưa bổ sung trải nghiệm cá nhân. Mô tả một khó khăn, cách giải quyết và điều sẽ thay đổi trong lần sau.',
-              },
-            ].map((r, i) => (
-              <article className="goal-row" key={r.title}>
-                <span>0{i + 1}</span>
-                <div>
-                  <h3>{r.title}</h3>
-                  <p>{r.text}</p>
-                </div>
-              </article>
+          <Bang
+            cot={['Công cụ', 'Mục đích sử dụng', 'Phạm vi']}
+            dong={tongKet.congCuAI.map((tool) => [tool.congCu, tool.mucDich, tool.dungO])}
+          />
+          <p>
+            Các tên công cụ chưa xác nhận được đánh dấu để bổ sung. Nguồn học thuật được ghi tại
+            phần sản phẩm của Bài 2 và Bài 6; cần đối chiếu bản gốc trước khi dùng làm căn cứ.
+          </p>
+          <p>
+            Ảnh chân dung do người dùng cung cấp. Minh họa đại dương cầm được dựng cho website. Nhạc
+            nền mặc định “Piano Concerto No.21” sử dụng tệp MP3 do người dùng cung cấp; không phải
+            sản phẩm Suno AI trong danh sách thử nghiệm.
+          </p>
+          <p>
+            Bộ đèn giao thông ở Bài 6 là tương tác tự kiểm tra. Các phân tích “Tìm hiểu & vận dụng”
+            được AI hỗ trợ biên tập từ hồ sơ, không phải nhật ký thực nghiệm bổ sung.
+          </p>
+        </section>
+        <section>
+          <p className="eyebrow">05 / HƯỚNG PHÁT TRIỂN</p>
+          <h2>Tiếp tục từ đây.</h2>
+          <ul>
+            {tongKet.huongTiepTheo.map((text, i) => (
+              <li key={i}>
+                <DinhDang text={text} />
+              </li>
             ))}
-          </div>
-        </div>
-      </section>
-      <section className="section-pad sources" id="sources">
-        <div className="section-label">
-          <span>02 / MINH BẠCH & TRÁCH NHIỆM</span>
-          <span>AI / SOURCES</span>
-        </div>
-        <div className="two-col">
-          <div>
-            <h2>
-              Công nghệ hỗ trợ.
-              <br />
-              Con người làm chủ.
-            </h2>
+          </ul>
+          <div className={s.loiKet}>
+            {tongKet.loiKet.map((text, i) => (
+              <p key={i}>
+                <DinhDang text={text} />
+              </p>
+            ))}
+            <p className={s.khauHieu}>{tongKet.khauHieu}</p>
             <p>
-              Website được xây dựng với sự hỗ trợ của trợ lý AI để tổ chức mã nguồn, thiết kế và
-              soạn nội dung hướng dẫn minh họa. Thông tin cá nhân và ảnh chân dung do người dùng
-              cung cấp.
-            </p>
-            <p>
-              Các bước thực hành, prompt và cấu trúc thư mục là ví dụ tham khảo, không đại diện cho
-              bài tập đã hoàn thành. Phản tư, nhật ký AI và minh chứng học tập cần được sinh viên tự
-              bổ sung, kiểm tra và chịu trách nhiệm trước khi nộp.
+              <DinhDang text={tongKet.loiCamOn} />
             </p>
           </div>
-          <div>
-            <h3>Nguồn & tài nguyên</h3>
-            <p>
-              Hình đại dương cầm: minh họa vector được dựng cho website, không phải ảnh biểu diễn
-              của sinh viên.
-            </p>
-            <p>Ảnh chân dung: ảnh do người dùng cung cấp.</p>
-            <p>Định hướng thiết kế: “Piano Prelude: Luxury Editorial Portfolio”.</p>
-            <h3>Lưu ý hồ sơ học phần</h3>
-            <p>
-              Báo cáo Word là bài nộp riêng, website không thay thế báo cáo. Thông tin khoa và các
-              sản phẩm bài tập còn cần bổ sung.
-            </p>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
       <section className="final-chapters section-pad">
-        <p className="eyebrow">LẮNG NGHE LẠI TỪNG CHƯƠNG</p>
+        <p className="eyebrow">XEM LẠI SÁU BÀI TẬP</p>
         {assignments.map((a) => (
           <Link key={a.id} href={`/projects/${a.slug}`}>
             <span>0{a.id}</span>

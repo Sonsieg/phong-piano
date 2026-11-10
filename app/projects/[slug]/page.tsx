@@ -3,185 +3,199 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { assignments } from '@/src/data/assignments';
-import { AssignmentContent } from '@/components/assignment-content';
-import { MediaViewer } from '@/components/interactions';
+import { baiTap } from '@/portfolio-nextjs/content/portfolio';
+import { Bang, DinhDang, KhoiNoiDung, TepNhung } from '@/portfolio-nextjs/components/portfolio-ui';
+import s from '@/portfolio-nextjs/components/portfolio.module.css';
+import { learningConnections } from '@/src/data/learning-connections';
+
+type Props = { params: Promise<{ slug: string }> };
 export function generateStaticParams() {
-  return assignments.map((a) => ({ slug: a.slug }));
+  return assignments.map(({ slug }) => ({ slug }));
 }
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{
-    slug: string;
-  }>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const a = assignments.find((a) => a.slug === slug);
+  const a = assignments.find((item) => item.slug === slug);
   return {
-    title: a ? `${a.chapter} — ${a.title}` : 'Không tìm thấy bài tập',
+    title: a ? `Bài ${a.id} — ${a.title}` : 'Không tìm thấy bài tập',
     description: a?.description,
   };
 }
-export default async function AssignmentPage({
-  params,
-}: {
-  params: Promise<{
-    slug: string;
-  }>;
-}) {
+export default async function AssignmentPage({ params }: Props) {
   const { slug } = await params;
-  const a = assignments.find((a) => a.slug === slug);
-  if (!a) notFound();
-  const prev = assignments[a.id - 2];
+  const a = assignments.find((item) => item.slug === slug);
+  const b = baiTap.find((item) => item.slug === slug);
+  if (!a || !b) notFound();
+  const previous = assignments[a.id - 2];
   const next = assignments[a.id];
+  const insight = learningConnections[a.id - 1];
   return (
     <>
       <section className="assignment-hero section-pad">
         <div className="section-label">
-          <Link href="/projects">← DỰ ÁN / {a.chapter.toUpperCase()}</Link>
-          <span>INF2501 / 0{a.id}—06</span>
+          <Link href="/projects">← DỰ ÁN / BÀI {a.id}</Link>
+          <span>INF2501 / {a.textbookSection}</span>
         </div>
         <div className="assignment-title">
           <span className="chapter-big">0{a.id}</span>
           <div>
-            <p className="eyebrow lime">{a.chapter} / THE ART OF LEARNING</p>
+            <p className="eyebrow lime">{a.chapterName}</p>
             <h1>{a.title}</h1>
             <p>{a.description}</p>
           </div>
         </div>
         <div className="assignment-hero-bottom">
           <div className="tags">
-            {a.skills.map((s) => (
-              <span key={s}>{s}</span>
+            {a.skills.map((skill) => (
+              <span key={skill}>{skill}</span>
             ))}
           </div>
           <span className="status">
             <i />
-            {a.status}
+            Nội dung đã tích hợp
           </span>
         </div>
       </section>
       <div className="assignment-body section-pad">
         <aside className="assignment-sidebar">
-          <p className="eyebrow">TRONG CHƯƠNG NÀY</p>
-          <a href="#objectives">01 — Mục tiêu</a>
-          <a href="#process">02 — Quy trình</a>
-          <a href="#workshop">03 — Nội dung thực hành</a>
-          <a href="#my-work">＋ Bài làm & trợ giảng</a>
-          <a href="#evidence">04 — Sản phẩm & minh chứng</a>
-          <a href="#reflection">05 — Tự đánh giá & nguồn</a>
+          <p className="eyebrow">TRONG BÀI TẬP NÀY</p>
+          <a href="#objectives">a — Mục tiêu & kỹ năng</a>
+          <a href="#process">b — Quá trình thực hiện</a>
+          <a href="#workshop">c — Sản phẩm cuối cùng</a>
+          <a href="#evidence">Minh chứng & tệp đính kèm</a>
+          <a href="#connections">Tìm hiểu & vận dụng</a>
+          <a href="#personal-work">Ghi chú & bài làm cá nhân</a>
+          <Link href="/projects">← Về danh mục dự án</Link>
           <p className="sidebar-note">
-            Nội dung thực hành là hướng dẫn tham khảo. Sinh viên cần bổ sung quá trình thực hiện và
-            kết quả của mình.
+            {a.textbookSection} · {a.weight} điểm theo đề. Nội dung được biên tập từ hồ sơ cung cấp;
+            các mục cần bổ sung được đánh dấu riêng.
           </p>
         </aside>
-        <div className="assignment-content">
+        <div className={`assignment-content ${s.noiDung}`}>
           <section id="objectives">
-            <p className="eyebrow">01 / MỤC TIÊU HỌC TẬP</p>
-            <h2>
-              Bắt đầu từ
-              <br />
-              điều cần hiểu.
-            </h2>
-            {a.objectives.map((s, i) => (
-              <div className="objective" key={s}>
+            <p className="eyebrow">a / MỤC TIÊU BÀI TẬP</p>
+            <h2>Yêu cầu & kỹ năng.</h2>
+            <p>
+              <DinhDang text={b.mucTieu.yeuCau} />
+            </p>
+            <h3>Kỹ năng được rèn luyện</h3>
+            {b.mucTieu.kyNang.map((skill, i) => (
+              <div className="objective" key={skill}>
                 <span>0{i + 1}</span>
-                <p>{s}</p>
+                <p>
+                  <DinhDang text={skill} />
+                </p>
               </div>
             ))}
           </section>
           <section id="process">
-            <p className="eyebrow">02 / KẾ HOẠCH THỰC HIỆN</p>
+            <p className="eyebrow">b / TÓM TẮT QUÁ TRÌNH THỰC HIỆN</p>
             <h2>
-              Từng bước
+              Từ lựa chọn
               <br />
-              tạo nên kết quả.
+              đến cách giải quyết.
             </h2>
-            <p className="note">Các bước đề xuất, chưa xác nhận là công việc đã hoàn thành.</p>
             <ol className="process-list">
-              {a.implementationSteps.map((s) => (
-                <li key={s}>{s}</li>
+              {b.quaTrinh.cacBuoc.map((step) => (
+                <li key={step.ten}>
+                  <div className="process-step">
+                    <h3>{step.ten}</h3>
+                    <p>
+                      <DinhDang text={step.moTa} />
+                    </p>
+                  </div>
+                </li>
               ))}
             </ol>
-            <div className="tool-line">
-              <span>CÔNG CỤ</span>
-              <p>{a.toolsUsed.join(' / ')}</p>
-            </div>
-          </section>
-          <section id="workshop" className="workshop">
-            <p className="eyebrow">03 / KHÔNG GIAN THỰC HÀNH</p>
-            <AssignmentContent id={a.id} />
-          </section>
-          <ExerciseWorkspace key={a.id} id={a.id} />
-          <section id="evidence">
-            <p className="eyebrow">04 / SẢN PHẨM & MINH CHỨNG</p>
-            <h2>
-              Để quá trình
-              <br />
-              có tiếng nói.
-            </h2>
-            <MediaViewer items={a.deliverables} />
-          </section>
-          <section id="reflection">
-            <p className="eyebrow">05 / TỰ ĐÁNH GIÁ & NGUỒN</p>
-            <h2>
-              Nhìn lại để
-              <br />
-              tiến xa hơn.
-            </h2>
-            <div className="reflection-row">
-              <h3>Khó khăn gặp phải</h3>
-              <p>{a.challenges}</p>
-            </div>
-            <div className="reflection-row">
-              <h3>Cách giải quyết</h3>
-              <p>{a.solutions}</p>
-            </div>
-            <div className="reflection-row">
+            <h3>Công cụ và mục đích sử dụng</h3>
+            <Bang
+              cot={['Công cụ', 'Mục đích']}
+              dong={b.quaTrinh.congCu.map((tool) => [tool.ten, tool.mucDich])}
+            />
+            <div className={s.hopAI}>
               <h3>Công bố sử dụng AI</h3>
-              <p>{a.aiUsage}</p>
-            </div>
-            <div className="reflection-row">
-              <h3>Tài liệu tham khảo</h3>
-              {a.references.length ? (
-                a.references.map((r) => (
-                  <a href={r.url} key={r.url} target="_blank" rel="noopener noreferrer">
-                    {r.title} ↗
-                  </a>
-                ))
-              ) : (
-                <p>
-                  Chưa bổ sung nguồn học thuật được sử dụng. Không có trích dẫn hoặc kết quả nghiên
-                  cứu được tạo thay cho sinh viên.
+              {b.quaTrinh.suDungAI.map((tool, i) => (
+                <p key={i}>
+                  <strong>
+                    <DinhDang text={tool.congCu} />
+                  </strong>
+                  : <DinhDang text={tool.mucDich} />
                 </p>
-              )}
+              ))}
+              <p>
+                <strong>Codex (OpenAI)</strong>: hỗ trợ tích hợp hồ sơ vào website, biên tập trình
+                bày và kiểm tra kỹ thuật trong lần cập nhật này.
+              </p>
+            </div>
+            <h3>Khó khăn và cách giải quyết</h3>
+            <Bang
+              cot={['Khó khăn', 'Cách giải quyết']}
+              dong={b.quaTrinh.khoKhan.map((item) => [item.khoKhan, item.cachGiaiQuyet])}
+            />
+          </section>
+          <section id="workshop">
+            <p className="eyebrow">c / SẢN PHẨM CUỐI CÙNG</p>
+            <h2>
+              Kết quả có cấu trúc.
+              <br />
+              Lập luận có căn cứ.
+            </h2>
+            <p>
+              <DinhDang text={b.sanPham.gioiThieu} />
+            </p>
+            {a.id === 4 && (
+              <p className="note">
+                Phần tự đánh giá phối hợp nhóm trong hồ sơ cần được sinh viên rà soát và xác nhận
+                theo trải nghiệm thực tế trước khi nộp.
+              </p>
+            )}
+            {b.sanPham.khoi.map((block, i) => (
+              <KhoiNoiDung key={i} khoi={block} />
+            ))}
+          </section>
+          <section id="evidence">
+            <p className="eyebrow">MINH CHỨNG / TỆP ĐÍNH KÈM</p>
+            <h2>
+              Đối chiếu với
+              <br />
+              sản phẩm thực tế.
+            </h2>
+            <p className="note">
+              Các tệp dưới đây là danh mục minh chứng của hồ sơ. Tệp chưa được cung cấp sẽ hiển thị
+              trạng thái chờ bổ sung.
+            </p>
+            <div className={s.luoiTep}>
+              {b.sanPham.tep.map((file, i) => (
+                <TepNhung key={i} tep={file} />
+              ))}
             </div>
           </section>
+          <section id="connections" className="learning-insight">
+            <p className="eyebrow">TÌM HIỂU / LỰA CHỌN / VẬN DỤNG</p>
+            <h2>{insight.title}</h2>
+            <p>{insight.reasoning}</p>
+            <h3>Giới hạn cần nhận diện</h3>
+            <p>{insight.limit}</p>
+            <h3>Kết nối với hành trình học tập</h3>
+            <p>{insight.application}</p>
+            <Link href={`/projects/bai-${insight.related}`} className="text-link">
+              Đọc bài {insight.related} liên quan ↗
+            </Link>
+          </section>
+          <details id="personal-work" className="personal-work">
+            <summary>Ghi chú & bài làm cá nhân</summary>
+            <ExerciseWorkspace key={a.id} id={a.id} />
+          </details>
         </div>
       </div>
-      <nav className="chapter-navigation" aria-label="Điều hướng giữa các bài tập">
-        {prev ? (
-          <Link href={`/projects/${prev.slug}`}>
-            <span>← CHƯƠNG TRƯỚC</span>
-            <strong>{prev.title}</strong>
-          </Link>
-        ) : (
-          <Link href="/projects">
-            <span>← MỤC LỤC</span>
-            <strong>Sáu chương học tập</strong>
-          </Link>
-        )}
-        {next ? (
-          <Link href={`/projects/${next.slug}`}>
-            <span>CHƯƠNG TIẾP THEO →</span>
-            <strong>{next.title}</strong>
-          </Link>
-        ) : (
-          <Link href="/conclusion">
-            <span>LỜI KẾT →</span>
-            <strong>Khép lại một chương.</strong>
-          </Link>
-        )}
+      <nav className="chapter-navigation" aria-label="Điều hướng bài tập">
+        <Link href={previous ? `/projects/${previous.slug}` : '/projects'}>
+          <span>{previous ? '← BÀI TRƯỚC' : '← DANH MỤC'}</span>
+          <strong>{previous?.title ?? 'Sáu bài tập'}</strong>
+        </Link>
+        <Link href={next ? `/projects/${next.slug}` : '/conclusion'}>
+          <span>{next ? 'BÀI TIẾP THEO →' : 'TỔNG KẾT →'}</span>
+          <strong>{next?.title ?? 'Nhìn lại hành trình học tập'}</strong>
+        </Link>
       </nav>
     </>
   );

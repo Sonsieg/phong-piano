@@ -32,8 +32,8 @@ export default function Projects() {
       </section>
       <section className="projects-index section-pad">
         <p className="note">
-          Đây là khung hồ sơ học tập. Nội dung hướng dẫn bên dưới là kế hoạch tham khảo; minh chứng
-          và kết quả thực tế chưa được bổ sung.
+          Sáu bài tập được biên tập theo đúng danh mục của đề thi. Mỗi bài gồm mục tiêu, quá trình
+          thực hiện và sản phẩm; các ảnh hoặc liên kết chưa có trong hồ sơ được ghi rõ để bổ sung.
         </p>
         {assignments.map((a) => (
           <Link href={`/projects/${a.slug}`} className="project-row" key={a.id}>
@@ -44,6 +44,10 @@ export default function Projects() {
               </p>
               <h2>{a.shortTitle}</h2>
               <p>{a.title}</p>
+              <p className="project-summary">{a.description}</p>
+              <p className="eyebrow">
+                {a.textbookSection} · {a.weight} điểm
+              </p>
               <div className="tags">
                 {a.skills.map((s) => (
                   <span key={s}>{s}</span>

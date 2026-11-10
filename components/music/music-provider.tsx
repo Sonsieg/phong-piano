@@ -10,8 +10,15 @@ type MusicState = {
   muted: boolean;
   error: string;
   trackIndex: number;
+  currentTime: number;
+  duration: number;
+  repeatOne: boolean;
+  seek: (seconds: number) => void;
+  previous: () => void;
+  toggleRepeat: () => void;
   toggle: () => void;
   next: () => void;
+  selectTrack: (index: number) => void;
   setVolume: (value: number) => void;
   toggleMute: () => void;
   analyser: React.RefObject<AnalyserNode | null>;
@@ -25,6 +32,8 @@ export function useMusic() {
 }
 export function MusicProvider({ children }: { children: ReactNode }) {
   const audio = useRef<HTMLAudioElement | null>(null);
+  const currentIndex = useRef(0);
+  const playNext = useRef<(index: number) => void>(() => {});
   const context = useRef<AudioContext | null>(null);
   const gain = useRef<GainNode | null>(null);
   const analyser = useRef<AnalyserNode | null>(null);
@@ -38,11 +47,27 @@ export function MusicProvider({ children }: { children: ReactNode }) {
   const [muted, setMuted] = useState(false);
   const [error, setError] = useState('');
   const [trackIndex, setTrackIndex] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [repeatOne, setRepeatOne] = useState(false);
   useEffect(() => {
     const pending = operation.current;
     const element = new Audio();
     element.preload = 'none';
-    element.loop = true;
+    element.loop = false;
+    const onEnded = () => playNext.current((currentIndex.current + 1) % playlist.length);
+    element.addEventListener('ended', onEnded);
+    const onTime = () =>
+      setCurrentTime(Number.isFinite(element.currentTime) ? element.currentTime : 0);
+    const onDuration = () => setDuration(Number.isFinite(element.duration) ? element.duration : 0);
+    const onEmpty = () => {
+      setCurrentTime(0);
+      setDuration(0);
+    };
+    element.addEventListener('timeupdate', onTime);
+    element.addEventListener('loadedmetadata', onDuration);
+    element.addEventListener('durationchange', onDuration);
+    element.addEventListener('emptied', onEmpty);
     audio.current = element;
     const onPlay = () => setPlaying(true);
     const onPause = () => {
@@ -78,6 +103,11 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       element.pause();
       element.removeAttribute('src');
       element.load();
+      element.removeEventListener('ended', onEnded);
+      element.removeEventListener('timeupdate', onTime);
+      element.removeEventListener('loadedmetadata', onDuration);
+      element.removeEventListener('durationchange', onDuration);
+      element.removeEventListener('emptied', onEmpty);
       element.removeEventListener('playing', onPlay);
       element.removeEventListener('pause', onPause);
       element.removeEventListener('error', onError);
@@ -111,6 +141,8 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       setError('Chưa có nguồn nhạc.');
       return;
     }
+    currentIndex.current = index;
+    setTrackIndex(index);
     const currentOperation = ++operation.current.id;
     if (timer.current) clearTimeout(timer.current);
     setLoading(true);
@@ -131,7 +163,11 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       }
       // Start/resume only inside the user's click, including on mobile Safari.
       const resume = context.current?.resume();
-      if (element.getAttribute('src') !== track.src) element.src = track.src;
+      if (element.getAttribute('src') !== track.src) {
+        setCurrentTime(0);
+        setDuration(0);
+        element.src = track.src;
+      }
       fade(0, 0);
       await Promise.all([resume, element.play()]);
       if (currentOperation !== operation.current.id) return;
@@ -145,6 +181,18 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       if (currentOperation === operation.current.id) setLoading(false);
     }
   }
+  useEffect(() => {
+    playNext.current = (index) => {
+      if (repeatOne && audio.current) {
+        audio.current.currentTime = 0;
+        void play(currentIndex.current);
+      } else void play(index);
+    };
+  });
+  function selectTrack(index: number) {
+    if (!Number.isInteger(index) || !playlist[index]) return;
+    void play(index);
+  }
   function toggle() {
     if (!audio.current) return;
     if (loading || !audio.current.paused) {
@@ -155,22 +203,41 @@ export function MusicProvider({ children }: { children: ReactNode }) {
       timer.current = setTimeout(() => audio.current?.pause(), 360);
     } else void play();
   }
-  function next() {
-    if (playlist.length < 2 || loading) return;
-    const index = (trackIndex + 1) % playlist.length;
-    setTrackIndex(index);
+  function changeTrack(index: number) {
+    if (!playlist[index] || loading) return;
     const element = audio.current;
-    if (element && !element.paused) {
-      fade(0);
-      setLoading(true);
-      if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(() => {
-        element.pause();
-        void play(index);
-      }, 360);
-    } else if (element) {
+    if (!element) return;
+    if (timer.current) clearTimeout(timer.current);
+    if (!element.paused) {
+      void play(index);
+    } else {
+      currentIndex.current = index;
+      setTrackIndex(index);
+      setCurrentTime(0);
+      setDuration(0);
+      setError('');
+      element.preload = 'metadata';
       element.src = playlist[index].src;
     }
+  }
+  function next() {
+    changeTrack((currentIndex.current + 1) % playlist.length);
+  }
+  function previous() {
+    changeTrack((currentIndex.current - 1 + playlist.length) % playlist.length);
+  }
+  function seek(seconds: number) {
+    const element = audio.current;
+    if (
+      !element ||
+      !Number.isFinite(seconds) ||
+      !Number.isFinite(element.duration) ||
+      element.duration <= 0
+    )
+      return;
+    const time = Math.max(0, Math.min(seconds, element.duration));
+    element.currentTime = time;
+    setCurrentTime(time);
   }
   function setVolume(value: number) {
     settings.current.volume = value;
@@ -193,8 +260,15 @@ export function MusicProvider({ children }: { children: ReactNode }) {
         muted,
         error,
         trackIndex,
+        currentTime,
+        duration,
+        repeatOne,
+        seek,
+        previous,
+        toggleRepeat: () => setRepeatOne((value) => !value),
         toggle,
         next,
+        selectTrack,
         setVolume,
         toggleMute,
         analyser,

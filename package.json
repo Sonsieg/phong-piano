@@ -9,7 +9,8 @@
     "lint": "eslint",
     "check:routes": "node scripts/check-routes.mjs",
     "format": "prettier --write \"{app,components,src,scripts}/**/*.{ts,tsx,js,mjs,css}\" \"*.{ts,mjs,json}\"",
-    "format:check": "prettier --check \"{app,components,src,scripts}/**/*.{ts,tsx,js,mjs,css}\" \"*.{ts,mjs,json}\""
+    "format:check": "prettier --check \"{app,components,src,scripts}/**/*.{ts,tsx,js,mjs,css}\" \"*.{ts,mjs,json}\"",
+    "prepare:submission": "node scripts/prepare-submission.mjs && python3 scripts/create-report.py"
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "^5.3.0",

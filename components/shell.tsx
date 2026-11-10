@@ -1,11 +1,14 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { AssistantChat } from '@/components/assistant-chat';
 import { assignments } from '@/src/data/assignments';
 import { student } from '@/src/config/student';
 export function Header() {
   const [open, setOpen] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const closeAssistant = useCallback(() => setAssistantOpen(false), []);
   const [scrolled, setScrolled] = useState(false);
   const path = usePathname();
   useEffect(() => {
@@ -105,16 +108,40 @@ export function Header() {
         <Link href="/conclusion" aria-current={path === '/conclusion' ? 'page' : undefined}>
           Tổng kết
         </Link>
+        <Link href="/am-nhac" aria-current={path === '/am-nhac' ? 'page' : undefined}>
+          Âm nhạc
+        </Link>
+        <Link href="/tri-an" aria-current={path === '/tri-an' ? 'page' : undefined}>
+          Tri ân thầy
+        </Link>
       </nav>
-      <a className="header-contact" href={`mailto:${student.email}`}>
-        Cùng kết nối <span>↗</span>
-      </a>
+      <div className="header-actions">
+        <button
+          id="assistant-toggle"
+          className="assistant-toggle"
+          type="button"
+          aria-expanded={assistantOpen}
+          aria-controls="assistant-panel"
+          onClick={() => {
+            setOpen(false);
+            setAssistantOpen((value) => !value);
+          }}
+        >
+          <span aria-hidden="true">✦</span> Trợ lý AI
+        </button>
+        <a className="header-contact" href={`mailto:${student.email}`}>
+          Cùng kết nối <span>↗</span>
+        </a>
+      </div>
       <button
         id="menu-toggle"
         className="menu-toggle"
         aria-expanded={open}
         aria-controls="mobile-nav"
-        onClick={() => setOpen(!open)}
+        onClick={() => {
+          setAssistantOpen(false);
+          setOpen(!open);
+        }}
       >
         {open ? 'Đóng ×' : 'Menu ☰'}
       </button>
@@ -139,8 +166,23 @@ export function Header() {
           <Link onClick={() => setOpen(false)} href="/conclusion">
             Tổng kết ↗
           </Link>
+          <Link
+            onClick={() => setOpen(false)}
+            href="/am-nhac"
+            aria-current={path === '/am-nhac' ? 'page' : undefined}
+          >
+            Âm nhạc ↗
+          </Link>
+          <Link
+            onClick={() => setOpen(false)}
+            href="/tri-an"
+            aria-current={path === '/tri-an' ? 'page' : undefined}
+          >
+            Tri ân thầy ↗
+          </Link>
         </nav>
       )}
+      <AssistantChat open={assistantOpen} onClose={closeAssistant} />
     </header>
   );
 }
@@ -175,7 +217,8 @@ export function Footer() {
           </p>
           <p>
             <Link href="/projects">Dự án</Link> / <Link href="/conclusion">Tổng kết</Link> /{' '}
-            <Link href="/conclusion#sources">Nguồn & AI</Link>
+            <Link href="/conclusion#sources">Nguồn & AI</Link> /{' '}
+            <Link href="/am-nhac">Âm nhạc</Link> / <Link href="/tri-an">Tri ân thầy</Link>
           </p>
         </div>
       </div>

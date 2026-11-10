@@ -48,8 +48,8 @@ export default function Home() {
               </span>
             </div>
             <div className="portrait-caption">
-              <span>ĐINH QUANG PHONG</span>
-              <span>2007 — VIỆT NAM</span>
+              <span>{student.name.toUpperCase()}</span>
+              <span>{student.birthYear} — VIỆT NAM</span>
             </div>
           </div>
           <div className="about-copy">
@@ -77,16 +77,18 @@ export default function Home() {
               </div>
               <div>
                 <span>SỞ THÍCH</span>
-                <p>Đá bóng & Ca hát</p>
+                <p>{student.hobbies.join(' & ')}</p>
               </div>
               <div>
                 <span>GIẢNG VIÊN HƯỚNG DẪN</span>
                 <p>{student.supervisor}</p>
               </div>
-              <div>
-                <span>KHOA</span>
-                <p>{student.faculty}</p>
-              </div>
+              {student.faculty && (
+                <div>
+                  <span>KHOA</span>
+                  <p>{student.faculty}</p>
+                </div>
+              )}
             </div>
             <a href={`mailto:${student.email}`} className="text-link">
               Trò chuyện cùng tôi <span>↗</span>
@@ -99,21 +101,26 @@ export default function Home() {
           <span>02 / GÓC NHÌN</span>
           <span>CREATIVITY MEETS POSSIBILITY</span>
         </div>
-        <p className="eyebrow lime">HAI THẾ GIỚI. MỘT NHỊP ĐẬP.</p>
-        <h2>
-          Giữa <span>nghệ thuật</span>
-          <br />
-          và công nghệ.
-        </h2>
-        <div className="philosophy-bottom">
-          <span className="asterisk" aria-hidden="true">
-            ✳
-          </span>
-          <p>
-            Âm nhạc dạy tôi lắng nghe. Công nghệ mở ra những cách mới để học hỏi, sáng tạo và chia
-            sẻ. Portfolio này là nơi tôi kết nối hai thế giới — bằng sự tò mò, tinh thần học tập và
-            trách nhiệm với từng sản phẩm.
-          </p>
+        <div className="philosophy-layout">
+          <div className="philosophy-copy">
+            <p className="eyebrow lime">HAI THẾ GIỚI. MỘT NHỊP ĐẬP.</p>
+            <h2>
+              Giữa <span>nghệ thuật</span>
+              <br />
+              và công nghệ.
+            </h2>
+            <div className="philosophy-bottom">
+              <span className="asterisk" aria-hidden="true">
+                ✳
+              </span>
+              <p>
+                Âm nhạc dạy tôi lắng nghe. Công nghệ mở ra những cách mới để học hỏi, sáng tạo và
+                chia sẻ. Portfolio này là nơi tôi kết nối hai thế giới — bằng sự tò mò, tinh thần
+                học tập và trách nhiệm với từng sản phẩm.
+              </p>
+            </div>
+          </div>
+          <PianoKeyboard embedded />
         </div>
       </section>
       <section className="goals section-pad">
@@ -130,8 +137,12 @@ export default function Home() {
           <div>
             {[
               {
+                title: 'Mục tiêu học tập',
+                text: student.learningGoals,
+              },
+              {
                 title: 'Vững chuyên môn',
-                text: student.careerDirection[0] + ' ' + student.learningGoals,
+                text: student.careerDirection[0],
               },
               { title: 'Trở thành người truyền cảm hứng', text: student.careerDirection[1] },
               {
@@ -164,7 +175,6 @@ export default function Home() {
         </h2>
         <ProjectGrid />
       </section>
-      <PianoKeyboard />
       <section className="purpose section-pad">
         <p className="eyebrow">KHÔNG CHỈ LÀ MỘT BÀI TẬP.</p>
         <h2>
