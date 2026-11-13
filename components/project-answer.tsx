@@ -212,21 +212,19 @@ export function ProjectAnswer({ id }: { id: number }) {
           {ready && !editing && (
             <>
               <button disabled={!ready || busy} onClick={startEditing}>
-                {hasAnswer ? 'Sửa bài làm' : '＋ Thêm bài làm'}
+                Sửa bài làm
               </button>
-              {hasAnswer && (
-                <button
-                  className="workspace-delete"
-                  disabled={!ready || busy}
-                  onClick={() => {
-                    setBase(answer);
-                    setStatus('');
-                    setConfirmDelete(true);
-                  }}
-                >
-                  Xóa bài làm
-                </button>
-              )}
+              <button
+                className="workspace-delete"
+                disabled={!ready || busy || !hasAnswer}
+                onClick={() => {
+                  setBase(answer);
+                  setStatus('');
+                  setConfirmDelete(true);
+                }}
+              >
+                Xóa bài làm
+              </button>
             </>
           )}
         </div>
