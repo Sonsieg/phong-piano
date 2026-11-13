@@ -152,3 +152,34 @@ test('a newer server revision replaces the previous published content', () => {
   assert.equal(read(1, 'old').content, 'old');
   assert.equal(read(2, 'new').content, 'new');
 });
+
+function firebaseConfigFor(env) {
+  const exports = {};
+  const code = ts.transpileModule(fs.readFileSync('src/lib/firebase.ts', 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
+  }).outputText;
+  vm.runInNewContext(code, {
+    exports,
+    process: { env },
+    require: (name) => {
+      if (name === 'firebase/app') return {};
+      if (name === 'firebase/firestore') return {};
+      throw new Error(`Unexpected Firebase dependency: ${name}`);
+    },
+  });
+  return exports.firebaseConfigured;
+}
+
+test('Firestore works without Storage, Auth domain or Messaging environment variables', () => {
+  assert.equal(
+    firebaseConfigFor({
+      NEXT_PUBLIC_FIREBASE_API_KEY: 'test-api-key',
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: 'test-project',
+      NEXT_PUBLIC_FIREBASE_APP_ID: 'test-app',
+    }),
+    true,
+  );
+});
+test('missing required Firestore configuration is detected', () => {
+  assert.equal(firebaseConfigFor({ NEXT_PUBLIC_FIREBASE_API_KEY: 'test-api-key' }), false);
+});

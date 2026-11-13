@@ -24,3 +24,9 @@ Script `npm run seed:firestore` chỉ là công cụ nhập nội dung gốc m�
 Ảnh đầu vào tối đa 5 MB được thu nhỏ tối đa 1000 px thành JPEG base64 và lưu cùng câu trả lời trong document. Toàn bài tối đa 800 KB UTF-8, tối đa 20 ảnh. Xóa bài cần xác nhận, lưu nội dung rỗng cùng revision mới để ngăn bản nháp cũ ghi đè.
 
 Kiểm tra: `npm run test:answers`, `npm run lint`, `npm run build`.
+
+## Vercel: website không tải được bài dù máy local vẫn xem được
+
+`.env.local` bị Git bỏ qua, nên Vercel không tự nhận cấu hình Firebase từ máy phát triển. Mở Vercel Dashboard → project → Settings → Environment Variables, thêm các biến `NEXT_PUBLIC_FIREBASE_*` từ `.env.local` cho Production (và Preview nếu cần), rồi Redeploy. Các biến public được đóng vào JavaScript lúc build; chỉ thêm biến mà không build lại sẽ chưa sửa được bản đang chạy.
+
+Bản mã hiện tại chỉ yêu cầu API key, project ID và app ID để dùng Firestore. Với bản deploy cũ vẫn kiểm tra đủ cấu hình Web, có thể thêm toàn bộ sáu biến trong `.env.local` trước khi redeploy. Không đưa dữ liệu bài làm mặc định vào biến môi trường; nội dung vẫn chỉ đọc từ database.

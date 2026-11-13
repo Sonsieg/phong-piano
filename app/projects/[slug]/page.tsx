@@ -1,5 +1,4 @@
 import { BasicAssignmentOne } from '@/components/basic-assignment-one';
-import { ExerciseWorkspace } from '@/components/exercise-workspace';
 import { ProjectAnswer } from '@/components/project-answer';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -142,10 +141,6 @@ export default async function AssignmentPage({ params }: Props) {
           Đọc bài {insight.related} liên quan ↗
         </Link>
       </section>
-      <details id="personal-work" className="personal-work">
-        <summary>Ghi chú & bài làm cá nhân</summary>
-        <ExerciseWorkspace key={a.id} id={a.id} />
-      </details>
     </>
   );
   return (
@@ -192,7 +187,6 @@ export default async function AssignmentPage({ params }: Props) {
               <a href="#workshop">c — Sản phẩm cuối cùng</a>
               <a href="#evidence">Minh chứng & tệp đính kèm</a>
               <a href="#connections">Tìm hiểu & vận dụng</a>
-              <a href="#personal-work">Ghi chú & bài làm cá nhân</a>
             </>
           )}
           <Link href="/projects">← Về danh mục dự án</Link>

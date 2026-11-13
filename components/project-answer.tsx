@@ -52,45 +52,52 @@ export function ProjectAnswer({ id }: { id: number }) {
     let active = true;
     let unsubscribe: (() => void) | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    Promise.resolve().then(() => {
-      if (!active) return;
-      setReady(false);
-      setLoadError('');
-      if (!firebaseConfigured) {
-        setLoadError('Chưa thể tải bài làm. Vui lòng thử lại sau.');
-        return;
-      }
-      const waiting = () => {
+    Promise.resolve()
+      .then(() => {
+        if (!active) return;
         setReady(false);
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          if (active) setLoadError('Chưa thể tải bài làm. Kiểm tra kết nối rồi thử lại.');
-        }, 12000);
-      };
-      waiting();
-      unsubscribe = onSnapshot(
-        answerRef(id),
-        { includeMetadataChanges: true },
-        (snapshot) => {
-          if (!active) return;
-          const latest = readServerAnswer(snapshot);
-          if (!latest) {
-            waiting();
-            return;
-          }
-          clearTimeout(timer);
-          setAnswer(latest);
-          setReady(true);
-          setLoadError('');
-        },
-        (error) => {
-          if (!active) return;
-          clearTimeout(timer);
+        setLoadError('');
+        if (!firebaseConfigured) {
+          setLoadError('Chưa thể tải bài làm. Vui lòng thử lại sau.');
+          return;
+        }
+        const waiting = () => {
           setReady(false);
-          setLoadError(errorMessage(error));
-        },
-      );
-    });
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            if (active) setLoadError('Chưa thể tải bài làm. Kiểm tra kết nối rồi thử lại.');
+          }, 12000);
+        };
+        waiting();
+        unsubscribe = onSnapshot(
+          answerRef(id),
+          { includeMetadataChanges: true },
+          (snapshot) => {
+            if (!active) return;
+            const latest = readServerAnswer(snapshot);
+            if (!latest) {
+              waiting();
+              return;
+            }
+            clearTimeout(timer);
+            setAnswer(latest);
+            setReady(true);
+            setLoadError('');
+          },
+          (error) => {
+            if (!active) return;
+            clearTimeout(timer);
+            setReady(false);
+            setLoadError(errorMessage(error));
+          },
+        );
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        clearTimeout(timer);
+        setReady(false);
+        setLoadError(errorMessage(error));
+      });
     return () => {
       active = false;
       clearTimeout(timer);
