@@ -209,7 +209,7 @@ export function ProjectAnswer({ id }: { id: number }) {
       <h2>Câu trả lời & hình ảnh.</h2>
       <>
         <div className="workspace-actions">
-          {!editing && (
+          {ready && !editing && (
             <>
               <button disabled={!ready || busy} onClick={startEditing}>
                 {hasAnswer ? 'Sửa bài làm' : '＋ Thêm bài làm'}
