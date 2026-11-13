@@ -124,3 +124,31 @@ test('all six original answers convert to editable Tiptap documents', async () =
   }
   assert.ok(answers[0].content.includes('Mở This PC'));
 });
+
+test('only confirmed server snapshots provide published answers', () => {
+  const { api } = setup();
+  const latest = { content: 'latest answer', images: [], revision: 8 };
+  const snapshot = (fromCache, hasPendingWrites, exists = true) => ({
+    metadata: { fromCache, hasPendingWrites },
+    exists: () => exists,
+    data: () => latest,
+  });
+  assert.equal(api.readServerAnswer(snapshot(true, false)), null);
+  assert.equal(api.readServerAnswer(snapshot(false, true)), null);
+  assert.equal(api.readServerAnswer(snapshot(false, false)).revision, 8);
+  const missing = api.readServerAnswer(snapshot(false, false, false));
+  assert.equal(missing.content, '');
+  assert.equal(missing.images.length, 0);
+});
+
+test('a newer server revision replaces the previous published content', () => {
+  const { api } = setup();
+  const read = (revision, content) =>
+    api.readServerAnswer({
+      metadata: { fromCache: false, hasPendingWrites: false },
+      exists: () => true,
+      data: () => ({ revision, content, images: [] }),
+    });
+  assert.equal(read(1, 'old').content, 'old');
+  assert.equal(read(2, 'new').content, 'new');
+});

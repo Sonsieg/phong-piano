@@ -3566,3 +3566,61 @@ b {
 .answer-dialog::backdrop {
   background: #0009;
 }
+
+.answer-notification {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(440px, calc(100vw - 32px));
+  padding: 16px 20px;
+  border: 1px solid #82977d;
+  border-radius: 10px;
+  background: #202c24;
+  color: #f1f6ed;
+  box-shadow: 0 8px 32px #0005;
+  overflow-wrap: anywhere;
+}
+.answer-notification p {
+  margin: 0;
+  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.answer-notification > span {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+.answer-notification-success {
+  border-color: #88c995;
+}
+.answer-notification-success > span {
+  color: #a4edb1;
+}
+.answer-notification-error {
+  background: #3b2424;
+  border-color: #df9696;
+}
+.answer-notification-error > span {
+  color: #ffb5b5;
+}
+.exercise-workspace .answer-notification button {
+  padding: 2px 8px;
+  border: 0;
+  font-size: 1.4rem;
+}
+.answer-dialog .answer-notification {
+  position: static;
+  width: 100%;
+  margin-top: 16px;
+  box-shadow: none;
+}
+@media (max-width: 760px) {
+  .answer-notification {
+    right: 16px;
+    bottom: 16px;
+  }
+}

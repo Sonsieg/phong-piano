@@ -11,6 +11,7 @@ import {
   imageTypes,
   prepareAnswerImage,
   validateAnswer,
+  readServerAnswer,
   type AnswerImage,
   type ProjectAnswer as Answer,
 } from '@/src/lib/project-answer';
@@ -22,71 +23,80 @@ const AnswerEditor = dynamic(
 );
 
 type DraftImage = AnswerImage & { file?: File };
+type Notice = { message: string; kind: 'info' | 'success' | 'error' };
 function errorMessage(error: unknown) {
   const code = (error as { code?: string })?.code;
   if (code?.includes('permission') || code?.includes('unauthorized'))
-    return 'Chưa thể tải bài trực tuyến. Bạn vẫn có thể chỉnh sửa trên thiết bị này.';
+    return 'Chưa thể truy cập bài làm. Vui lòng thử lại.';
   if (code) return 'Chưa thể hoàn tất thao tác. Vui lòng thử lại.';
   return error instanceof Error ? error.message : 'Chưa thể hoàn tất thao tác. Vui lòng thử lại.';
 }
-export function ProjectAnswer({ id, initialContent }: { id: number; initialContent: string }) {
-  const initialAnswer = { ...emptyAnswer, content: initialContent };
-  const [answer, setAnswer] = useState<Answer>(initialAnswer);
-  const [useCloud, setUseCloud] = useState(false);
-  const [editingCloud, setEditingCloud] = useState(false);
+export function ProjectAnswer({ id }: { id: number }) {
+  const [answer, setAnswer] = useState<Answer>(emptyAnswer);
+  const [loadError, setLoadError] = useState('');
+  const [retry, setRetry] = useState(0);
   const [base, setBase] = useState<Answer>(emptyAnswer);
   const [content, setContent] = useState('');
   const [images, setImages] = useState<DraftImage[]>([]);
   const [editing, setEditing] = useState(false);
-  const [ready, setReady] = useState(true);
+  const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState('');
+  const [notice, setNotice] = useState<Notice | null>(null);
+  function setStatus(message: string, kind: Notice['kind'] = 'info') {
+    setNotice(message ? { message, kind } : null);
+  }
   const [confirmDelete, setConfirmDelete] = useState(false);
   const objectUrls = useRef(new Set<string>());
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     let active = true;
     let unsubscribe: (() => void) | undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     Promise.resolve().then(() => {
       if (!active) return;
-      let localAnswer = { ...emptyAnswer, content: initialContent };
-      try {
-        const saved = localStorage.getItem(`project-answer-test-${id}`);
-        if (saved) {
-          const parsed = JSON.parse(saved) as Answer;
-          validateAnswer(parsed);
-          localAnswer = parsed;
-        }
-      } catch {
-        /* Keep the original answer if a local draft is invalid. */
+      setReady(false);
+      setLoadError('');
+      if (!firebaseConfigured) {
+        setLoadError('Chưa thể tải bài làm. Vui lòng thử lại sau.');
+        return;
       }
-      setAnswer(localAnswer);
-      setReady(true);
-      if (!firebaseConfigured) return;
+      const waiting = () => {
+        setReady(false);
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          if (active) setLoadError('Chưa thể tải bài làm. Kiểm tra kết nối rồi thử lại.');
+        }, 12000);
+      };
+      waiting();
       unsubscribe = onSnapshot(
         answerRef(id),
         { includeMetadataChanges: true },
         (snapshot) => {
-          if (!active || snapshot.metadata.fromCache) return;
-          setAnswer(
-            snapshot.exists()
-              ? (snapshot.data() as Answer)
-              : { ...emptyAnswer, content: initialContent },
-          );
-          setUseCloud(true);
+          if (!active) return;
+          const latest = readServerAnswer(snapshot);
+          if (!latest) {
+            waiting();
+            return;
+          }
+          clearTimeout(timer);
+          setAnswer(latest);
+          setReady(true);
+          setLoadError('');
         },
         (error) => {
           if (!active) return;
-          setUseCloud(false);
-          setStatus(errorMessage(error));
+          clearTimeout(timer);
+          setReady(false);
+          setLoadError(errorMessage(error));
         },
       );
     });
     return () => {
       active = false;
+      clearTimeout(timer);
       unsubscribe?.();
     };
-  }, [id, initialContent]);
+  }, [id, retry]);
   useEffect(() => {
     const urls = objectUrls.current;
     return () => urls.forEach((url) => URL.revokeObjectURL(url));
@@ -103,7 +113,6 @@ export function ProjectAnswer({ id, initialContent }: { id: number; initialConte
   }, [confirmDelete]);
   function startEditing() {
     setBase(answer);
-    setEditingCloud(useCloud);
     setContent(answer.content);
     setImages(answer.images);
     setEditing(true);
@@ -114,7 +123,7 @@ export function ProjectAnswer({ id, initialContent }: { id: number; initialConte
       (file) => imageTypes.includes(file.type) && file.size > 0 && file.size <= imageLimit,
     );
     if (accepted.length !== files.length)
-      setStatus('Một số ảnh không hợp lệ. Hỗ trợ JPG, PNG, WebP, GIF tối đa 5 MB/ảnh.');
+      setStatus('Một số ảnh không hợp lệ. Hỗ trợ JPG, PNG, WebP, GIF tối đa 5 MB/ảnh.', 'error');
     setImages((previous) => {
       const remaining = Math.max(0, 20 - previous.length);
       return [
@@ -149,17 +158,12 @@ export function ProjectAnswer({ id, initialContent }: { id: number; initialConte
       }
       const next = { content, images: saved, revision: base.revision + 1 };
       validateAnswer(next);
-      if (editingCloud) {
-        await commitAnswer(id, base, next);
-        setStatus('Đã lưu bài làm.');
-      } else {
-        localStorage.setItem(`project-answer-test-${id}`, JSON.stringify(next));
-        setAnswer(next);
-        setStatus('Đã lưu bài làm trên thiết bị này.');
-      }
+      await commitAnswer(id, base, next);
+      setAnswer(next);
+      setStatus('Lưu bài làm thành công.', 'success');
       setEditing(false);
     } catch (error) {
-      setStatus(errorMessage(error));
+      setStatus(`Lưu không thành công. ${errorMessage(error)}`, 'error');
     } finally {
       setBusy(false);
     }
@@ -167,22 +171,37 @@ export function ProjectAnswer({ id, initialContent }: { id: number; initialConte
   async function remove() {
     if (busy || !ready) return;
     setBusy(true);
-    setStatus('');
+    setStatus('Đang xóa bài làm…');
     try {
       const next = { ...emptyAnswer, revision: base.revision + 1 };
-      if (editingCloud) await commitAnswer(id, base, next);
-      else {
-        localStorage.setItem(`project-answer-test-${id}`, JSON.stringify(next));
-        setAnswer(next);
-      }
+      await commitAnswer(id, base, next);
+      setAnswer(next);
       setConfirmDelete(false);
-      setStatus(editingCloud ? 'Đã xóa bài làm.' : 'Đã xóa bài làm trên thiết bị này.');
+      setStatus('Xóa bài làm thành công.', 'success');
     } catch (error) {
-      setStatus(errorMessage(error));
+      setStatus(`Xóa không thành công. ${errorMessage(error)}`, 'error');
     } finally {
       setBusy(false);
     }
   }
+  const notification = notice && (
+    <div
+      className={`answer-notification answer-notification-${notice.kind}`}
+      role={notice.kind === 'error' ? 'alert' : 'status'}
+      aria-live={notice.kind === 'error' ? 'assertive' : 'polite'}
+      aria-atomic="true"
+    >
+      <span aria-hidden="true">
+        {notice.kind === 'success' ? '✓' : notice.kind === 'error' ? '!' : '…'}
+      </span>
+      <p>{notice.message}</p>
+      {!busy && (
+        <button type="button" aria-label="Đóng thông báo" onClick={() => setNotice(null)}>
+          ×
+        </button>
+      )}
+    </div>
+  );
   const hasAnswer = !!answer.content || answer.images.length > 0;
   return (
     <section id="project-answer" className="exercise-workspace project-answer">
@@ -201,7 +220,7 @@ export function ProjectAnswer({ id, initialContent }: { id: number; initialConte
                   disabled={!ready || busy}
                   onClick={() => {
                     setBase(answer);
-                    setEditingCloud(useCloud);
+                    setStatus('');
                     setConfirmDelete(true);
                   }}
                 >
@@ -211,7 +230,15 @@ export function ProjectAnswer({ id, initialContent }: { id: number; initialConte
             </>
           )}
         </div>
-        {!ready && !status && <p role="status">Đang tải bài làm…</p>}
+        {!ready && !loadError && <p role="status">Đang tải bài làm…</p>}
+        {loadError && (
+          <div role="alert">
+            <p>{loadError}</p>
+            <button disabled={busy} onClick={() => setRetry((value) => value + 1)}>
+              Thử lại
+            </button>
+          </div>
+        )}
         {editing ? (
           <form
             onSubmit={(event) => {
@@ -283,7 +310,9 @@ export function ProjectAnswer({ id, initialContent }: { id: number; initialConte
                 ))}
               </div>
               <div className="workspace-actions">
-                <button type="submit">{busy ? 'Đang lưu…' : 'Lưu & hiển thị'}</button>
+                <button type="submit" disabled={!ready || busy}>
+                  {busy ? 'Đang lưu…' : 'Lưu & hiển thị'}
+                </button>
                 <button
                   type="button"
                   onClick={() => {
@@ -341,9 +370,7 @@ export function ProjectAnswer({ id, initialContent }: { id: number; initialConte
           )
         )}
       </>
-      <p role="status" aria-live="polite">
-        {status}
-      </p>
+      {!confirmDelete && notification}
       <dialog
         ref={dialog}
         className="answer-dialog"
@@ -355,11 +382,16 @@ export function ProjectAnswer({ id, initialContent }: { id: number; initialConte
       >
         <h3 id={`delete-title-${id}`}>Xóa bài làm {id}?</h3>
         <p>Câu trả lời và toàn bộ hình ảnh của bài này sẽ bị xóa. Không thể hoàn tác.</p>
+        {confirmDelete && notification}
         <div className="workspace-actions">
           <button disabled={busy} onClick={() => setConfirmDelete(false)}>
             Giữ lại
           </button>
-          <button disabled={busy} className="workspace-delete" onClick={() => void remove()}>
+          <button
+            disabled={!ready || busy}
+            className="workspace-delete"
+            onClick={() => void remove()}
+          >
             {busy ? 'Đang xóa…' : 'Xác nhận xóa'}
           </button>
         </div>

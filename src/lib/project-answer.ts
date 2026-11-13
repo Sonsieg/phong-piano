@@ -1,9 +1,15 @@
-import { doc, runTransaction, serverTimestamp } from 'firebase/firestore';
+import { doc, runTransaction, serverTimestamp, type DocumentSnapshot } from 'firebase/firestore';
 import { getFirebase } from './firebase';
 
 export type AnswerImage = { id: string; url: string; caption: string };
 export type ProjectAnswer = { content: string; images: AnswerImage[]; revision: number };
 export const emptyAnswer: ProjectAnswer = { content: '', images: [], revision: 0 };
+export function readServerAnswer(
+  snapshot: Pick<DocumentSnapshot, 'metadata' | 'exists' | 'data'>,
+): ProjectAnswer | null {
+  if (snapshot.metadata.fromCache || snapshot.metadata.hasPendingWrites) return null;
+  return snapshot.exists() ? (snapshot.data() as ProjectAnswer) : emptyAnswer;
+}
 export const imageLimit = 5 * 1024 * 1024;
 export const imageTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 export const answerByteLimit = 800000;
@@ -11,7 +17,7 @@ export function validateAnswer(answer: ProjectAnswer) {
   if (answer.content.length > 200000 || answer.images.length > 20)
     throw new Error('Bài tối đa 200.000 ký tự dữ liệu và 20 ảnh.');
   if (new TextEncoder().encode(JSON.stringify(answer)).length > answerByteLimit)
-    throw new Error('Bài và ảnh vượt 800 KB. Hãy bớt ảnh trước khi lưu thử.');
+    throw new Error('Bài và ảnh vượt 800 KB. Hãy bớt ảnh trước khi lưu.');
 }
 export function answerRef(id: number) {
   if (!Number.isInteger(id) || id < 1 || id > 6) throw new Error('Bài tập không hợp lệ.');

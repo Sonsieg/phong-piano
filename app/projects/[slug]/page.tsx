@@ -1,4 +1,3 @@
-import { defaultProjectAnswer } from '@/src/lib/default-project-answers';
 import { BasicAssignmentOne } from '@/components/basic-assignment-one';
 import { ExerciseWorkspace } from '@/components/exercise-workspace';
 import { ProjectAnswer } from '@/components/project-answer';
@@ -203,7 +202,7 @@ export default async function AssignmentPage({ params }: Props) {
           </p>
         </aside>
         <div className={`assignment-content ${s.noiDung}`}>
-          <ProjectAnswer key={a.id} id={a.id} initialContent={defaultProjectAnswer(a.id)} />
+          <ProjectAnswer key={a.id} id={a.id} />
           <details className="personal-work" id="reference-material">
             <summary>Yêu cầu & tài liệu tham khảo của bài</summary>
             {a.id === 1 && <BasicAssignmentOne />}
