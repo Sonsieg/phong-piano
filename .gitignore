@@ -42,3 +42,4 @@ next-env.d.ts
 
 # Local exercise data and server credentials
 /.local/
+!.env.example

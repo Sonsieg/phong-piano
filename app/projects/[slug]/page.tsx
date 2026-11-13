@@ -1,5 +1,7 @@
+import { defaultProjectAnswer } from '@/src/lib/default-project-answers';
 import { BasicAssignmentOne } from '@/components/basic-assignment-one';
 import { ExerciseWorkspace } from '@/components/exercise-workspace';
+import { ProjectAnswer } from '@/components/project-answer';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -177,6 +179,7 @@ export default async function AssignmentPage({ params }: Props) {
       <div className="assignment-body section-pad">
         <aside className="assignment-sidebar">
           <p className="eyebrow">TRONG BÀI TẬP NÀY</p>
+          <a href="#project-answer">Câu trả lời & hình ảnh</a>
           {a.id === 1 ? (
             <>
               <a href="#basic-process">Thao tác cơ bản</a>
@@ -200,15 +203,19 @@ export default async function AssignmentPage({ params }: Props) {
           </p>
         </aside>
         <div className={`assignment-content ${s.noiDung}`}>
-          {a.id === 1 && <BasicAssignmentOne />}
-          {a.id === 1 ? (
-            <details id="advanced-answer" className="personal-work">
-              <summary>Bài tập 1, theo cách nâng cao</summary>
-              {advancedAnswer}
-            </details>
-          ) : (
-            advancedAnswer
-          )}
+          <ProjectAnswer key={a.id} id={a.id} initialContent={defaultProjectAnswer(a.id)} />
+          <details className="personal-work" id="reference-material">
+            <summary>Yêu cầu & tài liệu tham khảo của bài</summary>
+            {a.id === 1 && <BasicAssignmentOne />}
+            {a.id === 1 ? (
+              <details id="advanced-answer" className="personal-work">
+                <summary>Bài tập 1, theo cách nâng cao</summary>
+                {advancedAnswer}
+              </details>
+            ) : (
+              advancedAnswer
+            )}
+          </details>
         </div>
       </div>
       <nav className="chapter-navigation" aria-label="Điều hướng bài tập">

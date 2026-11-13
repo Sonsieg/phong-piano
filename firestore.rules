@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /projectAnswers/{lesson} {
+      allow read: if lesson.matches('bai-[1-6]');
+      allow create, update: if lesson.matches('bai-[1-6]')
+        && request.resource.data.keys().hasOnly(['content', 'images', 'revision', 'updatedAt'])
+        && request.resource.data.content is string
+        && request.resource.data.content.size() <= 200000
+        && request.resource.data.images is list
+        && request.resource.data.images.size() <= 20
+        && request.resource.data.revision is int
+        && request.resource.data.revision == (!exists(/databases/$(database)/documents/projectAnswers/$(lesson)) ? 1 : resource.data.revision + 1)
+        && request.resource.data.updatedAt == request.time;
+    }
+  }
+}
